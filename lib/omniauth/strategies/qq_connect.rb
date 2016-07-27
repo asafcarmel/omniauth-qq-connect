@@ -32,18 +32,22 @@ module OmniAuth
         end
       end
 
-      info do 
-        { 
+      info do
+        {
           :nickname => raw_info['nickname'],
           :name => raw_info['nickname'], # Since it is required, fill it with nickname
           :image => raw_info['figureurl_1'],
         }
       end
-      
+
       extra do
         {
           :raw_info => raw_info
         }
+      end
+
+      def client
+        ::OAuth2::Client.new(options.client_id.call(request.host), options.client_secret.call(request.host), deep_symbolize(options.client_options))
       end
 
       def raw_info
@@ -53,7 +57,7 @@ module OmniAuth
           client.request(:get, "https://graph.qq.com/user/get_user_info", :params => {
               :format => :json,
               :openid => uid,
-              :oauth_consumer_key => options[:client_id],
+              :oauth_consumer_key => options.client_id.call(request.host),
               :access_token => access_token.token
             }, :parse => :json).parsed
         end
